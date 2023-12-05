@@ -4,6 +4,8 @@
 # Build maven project
 mvn clean -U package -Dmaven.test.skip
 
+docker login registry.gitlab.com
+
 # Build
 docker build -t registry.gitlab.com/villcabo/polyglot-work/apppay .
 docker build -t registry.gitlab.com/villcabo/polyglot-work/appsecurity .
