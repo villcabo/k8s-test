@@ -1,13 +1,12 @@
 server:
-  port: 8081
+  port: 8082
 
 spring:
   application:
-    name: appinvoice
+    name: apppay
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5434/db_invoice
-    username: postgres
+    url: jdbc:mysql://localhost:3307/db_operation
+    username: root
     password: Polyglot#2023
   jpa:
     properties:
@@ -15,7 +14,5 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: none
-
-#JWT
-jwt:
-  secret: Key#SuperSecret$Polyglot2SS#JavaMicroservices#987654321
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
