@@ -1,0 +1,65 @@
+version: 0.2
+
+env:
+  variables:
+     REPOSITORY_ECR_URI: "532336934360.dkr.ecr.us-east-1.amazonaws.com/appsecurity"
+     AWS_DEFAULT_REGION: "us-east-1"
+     EKS_CLUSTER_NAME: "polyglot-eks-cluster"
+     EKS_KUBECTL_ROLE_ARN: "arn:aws:iam::532336934360:role/EKsCodeBuildKubectlJava"
+     EKS_NAME_DEPLOYMENT: "app-deployment-security"
+     
+phases:
+  install:
+    commands:
+    - echo Install started on `date`
+    # Update Kube config Home Directory
+    - export KUBECONFIG=$HOME/.kube/config
+    # Extracting AWS Credential Information using STS Assume Role for kubectl
+    - echo "Setting Environment Variables related to AWS CLI for Kube Config Setup"
+    - CREDENTIALS=$(aws sts assume-role --role-arn $EKS_KUBECTL_ROLE_ARN --role-session-name codebuild-kubectl --duration-seconds 900)
+    - export AWS_ACCESS_KEY_ID="$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')"
+    - export AWS_SECRET_ACCESS_KEY="$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')"
+    - export AWS_SESSION_TOKEN="$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')"
+    - export AWS_EXPIRATION=$(echo ${CREDENTIALS} | jq -r '.Credentials.Expiration')
+    # Additional Commands to view your credentials 
+    - echo "Credentials Value is..  ${CREDENTIALS}"
+    # Configure Kubernetes
+    # Install kubectl according to your EKS cluster version
+    - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/darwin/amd64/kubectl
+    - chmod +x ./kubectl
+    - mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+    - kubectl version --short --client
+    # Create kubeconfig file for your EKS cluster, replace region and name values
+    - echo UpdateConfig Kubernetes...
+    - aws sts get-caller-identity
+    - aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
+    - cat ~/.kube/config      
+  pre_build:
+    commands:
+      - echo Pre Build started on `date`      
+      # Start ECR
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_ECR_URI
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+  build:
+    commands:
+    - echo Build started on `date`    
+    # Build Docker Image
+    - echo Building the Docker image...
+    - docker build -t $REPOSITORY_ECR_URI:latest .
+    - docker tag $REPOSITORY_ECR_URI:latest $REPOSITORY_ECR_URI:$IMAGE_TAG
+    - docker tag $REPOSITORY_ECR_URI:latest $REPOSITORY_ECR_URI:$CODEBUILD_BUILD_NUMBER
+  post_build:
+    commands:
+      - echo Post Build started on `date`
+      # Push Docker Image
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_ECR_URI:latest
+      - docker push $REPOSITORY_ECR_URI:$IMAGE_TAG
+      #- docker push $REPOSITORY_ECR_URI:$CODEBUILD_BUILD_NUMBER
+      # Apply manifest
+      - kubectl apply -f ./k8s.yml
+      - kubectl set image deployment/$EKS_NAME_DEPLOYMENT app-security=$REPOSITORY_ECR_URI:$CODEBUILD_BUILD_NUMBER
+      

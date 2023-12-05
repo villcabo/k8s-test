@@ -1,6 +1,8 @@
 
 
 -- SQLSERVER
+CREATE DATABASE "db_security";
+
 CREATE TABLE access(
     userid INT IDENTITY(1,1),
     fullname VARCHAR(255) NOT NULL,

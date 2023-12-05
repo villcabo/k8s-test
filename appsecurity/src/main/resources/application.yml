@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: appsecurity
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost:1434;databaseName=db_security;encrypt=true;trustServerCertificate=true;
+    username: sa
+    password: Polyglot#2023
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.SQLServer2012Dialect
+    hibernate:
+      ddl-auto: none
+
+#JWT
+jwt:
+  secret: Key#SuperSecret$Polyglot2SS#JavaMicroservices#987654321
