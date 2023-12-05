@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: appinvoice
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5434/db_invoice
+    username: postgres
+    password: Polyglot#2023
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: none
+
+#JWT
+jwt:
+  secret: Key#SuperSecret$Polyglot2SS#JavaMicroservices#987654321
