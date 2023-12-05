@@ -6,7 +6,7 @@ services:
     container_name: database-mysql
     restart: always
     environment:
-    - MYSQL_ROOT_PASSWORD=Polyglot#2019
+    - MYSQL_ROOT_PASSWORD=Polyglot#2023
     ports:
     - 3307:3306
     - 33061:33060
@@ -20,7 +20,7 @@ services:
     - 1434:1433
     environment:
     - ACCEPT_EULA=Y
-    - SA_PASSWORD=Polyglot2019
+    - SA_PASSWORD=Polyglot#2023
     networks:
     - polyglot-test
   postgres:
@@ -28,7 +28,7 @@ services:
     container_name: database-postgres
     restart: always
     environment:
-    - POSTGRES_PASSWORD=Polyglot2019
+    - POSTGRES_PASSWORD=Polyglot#2023
     ports:
     - 5434:5432
     networks:
@@ -39,20 +39,9 @@ services:
     restart: always
     environment:
     - MONGO_INITDB_ROOT_USERNAME=Polyglot
-    - MONGO_INITDB_ROOT_PASSWORD=Polyglot#2019
+    - MONGO_INITDB_ROOT_PASSWORD=Polyglot#2023
     ports:
     - 27018:27017
-    networks:
-    - polyglot-test 
-  redis:
-    image: redis:6.2.6
-    command: --requirepass Polyglot#2019
-    container_name: database-redis
-    restart: always
-    environment:
-    - REDIS_PASSWORD=Polyglot#2019
-    ports:
-    - 6379:6379
     networks:
     - polyglot-test 
 
