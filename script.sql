@@ -37,3 +37,13 @@ INSERT INTO invoice(id_invoice, amount, state) VALUES(4, 480.88, 1);
 
 select  * from invoice;
 
+-- MySQL
+
+CREATE DATABASE db_operation;
+
+CREATE TABLE operation (
+id_operation INT AUTO_INCREMENT PRIMARY KEY,
+id_invoice INT,
+amount DECIMAL,
+date TIMESTAMP
+);
