@@ -1,4 +1,5 @@
 apiVersion: apps/v1
+
 kind: Deployment
 metadata:
   name: app-deployment-account
@@ -22,6 +23,33 @@ spec:
         env:             
         - name: SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS
           value: 54.205.96.96:9092
+---
+kind: Deployment
+metadata:
+  name: app-deployment-account
+  labels:
+    app: account-service
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: account-service
+  template:
+    metadata:
+      labels:
+        app: account-service
+    spec:
+      containers:
+        - name: app-account
+          image: 532336934360.dkr.ecr.us-east-1.amazonaws.com/appaccount
+          ports:
+            - containerPort: 80
+          env:
+            - name: SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS
+              value: 54.205.96.96:9092
+            - name: SPRING_DATA_MONGODB_HOST
+              value:
 ---
 kind: Service
 apiVersion: v1
