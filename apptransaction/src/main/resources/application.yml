@@ -1,0 +1,14 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: apptransaction
+  data:
+    mongodb:
+      host: localhost
+      port: 27018
+      database: db_transaction
+      username: Polyglot
+      password: Polyglot#2023
+      authentication-database: admin
