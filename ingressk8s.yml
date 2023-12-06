@@ -1,0 +1,161 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: secdeploy
+  labels:
+    app: security-service
+spec:
+  containers:
+  - name: appsecurity
+    image: registry.gitlab.com/villcabo/polyglot-work/appsecurity
+    ports:
+    - containerPort: 8080
+    env:
+    - name: SPRING_DATASOURCE_URL
+      value: jdbc:sqlserver://10.1.11.213:1434;databaseName=db_security;encrypt=true;trustServerCertificate=true;
+    - name: SERVER_SERVLET_CONTEXT_PATH
+      value: /security
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: secservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: security-service
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: invdeploy
+  labels:
+    app: invoice-service
+spec:
+  containers:
+  - name: appinvoice
+    image: registry.gitlab.com/villcabo/polyglot-work/appinvoice
+    ports:
+    - containerPort: 8081
+    env:
+    - name: SPRING_DATASOURCE_URL
+      value: jdbc:postgresql://10.1.11.213:5434/db_invoice
+    - name: SERVER_SERVLET_CONTEXT_PATH
+      value: /invoice
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: invservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: invoice-service
+  ports:
+  - name: http
+    port: 8081
+    targetPort: 8081
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: paydeploy
+  labels:
+    app: pay-service
+spec:
+  containers:
+  - name: apppay
+    image: registry.gitlab.com/villcabo/polyglot-work/apppay
+    ports:
+    - containerPort: 8082
+    env:
+    - name: SPRING_DATASOURCE_URL
+      value: jdbc:mysql://10.1.11.213:3307/db_operation
+    - name: SERVER_SERVLET_CONTEXT_PATH
+      value: /pay
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: payservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: pay-service
+  ports:
+  - name: http
+    port: 8082
+    targetPort: 8082
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: tradeploy
+  labels:
+    app: transaction-service
+spec:
+  containers:
+  - name: apptransaction
+    image: registry.gitlab.com/villcabo/polyglot-work/apptransaction
+    ports:
+    - containerPort: 8083
+    env:
+    - name: SPRING_DATA_MONGODB_HOST
+      value: 10.1.11.213
+    - name: SERVER_SERVLET_CONTEXT_PATH
+      value: /transaction
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: traservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: transaction-service
+  ports:
+  - name: http
+    port: 8083
+    targetPort: 8083
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: polyglot-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: /security
+            backend:
+              service:
+                name: secservice
+                port:
+                  number: 8080
+          - pathType: Prefix
+            path: /invoice
+            backend:
+              service:
+                name: invservice
+                port:
+                  number: 8081
+          - pathType: Prefix
+            path: /pay
+            backend:
+              service:
+                name: payservice
+                port:
+                  number: 8082
+          - pathType: Prefix
+            path: /transaction
+            backend:
+              service:
+                name: traservice
+                port:
+                  number: 8083
+---
