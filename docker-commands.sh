@@ -2,7 +2,7 @@
 
 
 # Build maven project
-mvn clean -U package -Dmaven.test.skip
+mvn clean -U package -Dmaven.skip.test
 
 docker login registry.gitlab.com
 
