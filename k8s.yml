@@ -1,0 +1,151 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: secdeploy
+  labels:
+    app: security-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: security-service
+  template:
+    metadata:
+      labels:
+        app: security-service
+    spec:
+      containers:
+      - name: appsecurity
+        image: registry.gitlab.com/villcabo/polyglot-work/appsecurity
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:sqlserver://10.1.11.213:1434;databaseName=db_security;encrypt=true;trustServerCertificate=true;
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: secservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: security-service
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: invdeploy
+  labels:
+    app: invoice-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoice-service
+  template:
+    metadata:
+      labels:
+        app: invoice-service
+    spec:
+      containers:
+      - name: appinvoice
+        image: registry.gitlab.com/villcabo/polyglot-work/appinvoice
+        ports:
+        - containerPort: 8081
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://10.1.11.213:5434/db_invoice
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: invservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: invoice-service
+  ports:
+  - name: http
+    port: 8081
+    targetPort: 8081
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: paydeploy
+  labels:
+    app: pay-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pay-service
+  template:
+    metadata:
+      labels:
+        app: pay-service
+    spec:
+      containers:
+      - name: apppay
+        image: registry.gitlab.com/villcabo/polyglot-work/apppay
+        ports:
+        - containerPort: 8082
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:mysql://10.1.11.213:3307/db_operation
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: payservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: pay-service
+  ports:
+  - name: http
+    port: 8082
+    targetPort: 8082
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: tradeploy
+  labels:
+    app: transaction-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-service
+  template:
+    metadata:
+      labels:
+        app: transaction-service
+    spec:
+      containers:
+      - name: apptransaction
+        image: registry.gitlab.com/villcabo/polyglot-work/apptransaction
+        ports:
+        - containerPort: 8083
+        env:
+        - name: SPRING_DATA_MONGODB_HOST
+          value: 10.1.11.213
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: traservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: transaction-service
+  ports:
+  - name: http
+    port: 8083
+    targetPort: 8083
